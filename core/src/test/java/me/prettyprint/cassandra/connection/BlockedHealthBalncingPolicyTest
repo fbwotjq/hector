@@ -1,0 +1,77 @@
+package me.prettyprint.cassandra.connection;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import me.prettyprint.cassandra.service.CassandraHost;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+public class BlockedHealthBalncingPolicyTest {
+
+	private BlockedHealthBalncingPolicy blockedHealthBalncingPolicy;
+	
+	protected List<HClientPool> pools = new ArrayList<HClientPool>();
+	
+	protected ConcurrentHClientPool poolWith5Idle6Block;
+	protected ConcurrentHClientPool poolWith0Idle100Block;
+	protected ConcurrentHClientPool poolWith7Idle3Block;
+	protected ConcurrentHClientPool poolWith5Idle20Block;
+	protected ConcurrentHClientPool poolWith0Idle0Block;
+	protected ConcurrentHClientPool poolWith4Idle2Block;
+	  
+	@Before
+	public void setup() {
+		
+		blockedHealthBalncingPolicy = new BlockedHealthBalncingPolicy();
+		
+		poolWith5Idle6Block = Mockito.mock(ConcurrentHClientPool.class);
+		Mockito.when(poolWith5Idle6Block.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:19161"));
+		Mockito.when(poolWith5Idle6Block.getNumIdle()).thenReturn(5);
+		Mockito.when(poolWith5Idle6Block.getNumBlockedThreads()).thenReturn(6);
+		pools.add(poolWith5Idle6Block);
+		
+		poolWith0Idle100Block = Mockito.mock(ConcurrentHClientPool.class);
+		Mockito.when(poolWith0Idle100Block.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:19162"));
+		Mockito.when(poolWith0Idle100Block.getNumIdle()).thenReturn(0);
+		Mockito.when(poolWith0Idle100Block.getNumBlockedThreads()).thenReturn(100);
+		pools.add(poolWith0Idle100Block);
+		
+		poolWith7Idle3Block = Mockito.mock(ConcurrentHClientPool.class);
+		Mockito.when(poolWith7Idle3Block.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:19163"));
+		Mockito.when(poolWith7Idle3Block.getNumIdle()).thenReturn(7);
+		Mockito.when(poolWith7Idle3Block.getNumBlockedThreads()).thenReturn(3);
+		pools.add(poolWith7Idle3Block);
+		
+		poolWith5Idle20Block = Mockito.mock(ConcurrentHClientPool.class);
+		Mockito.when(poolWith5Idle20Block.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:19164"));
+		Mockito.when(poolWith5Idle20Block.getNumIdle()).thenReturn(5);
+		Mockito.when(poolWith5Idle20Block.getNumBlockedThreads()).thenReturn(0);
+		pools.add(poolWith5Idle20Block);
+		
+		poolWith0Idle0Block = Mockito.mock(ConcurrentHClientPool.class);
+		Mockito.when(poolWith0Idle0Block.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:19165"));
+		Mockito.when(poolWith0Idle0Block.getNumIdle()).thenReturn(0);
+		Mockito.when(poolWith0Idle0Block.getNumBlockedThreads()).thenReturn(0);
+		pools.add(poolWith0Idle0Block);
+		
+		poolWith4Idle2Block = Mockito.mock(ConcurrentHClientPool.class);
+		Mockito.when(poolWith4Idle2Block.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:19166"));
+		Mockito.when(poolWith4Idle2Block.getNumIdle()).thenReturn(4);
+		Mockito.when(poolWith4Idle2Block.getNumBlockedThreads()).thenReturn(2);
+		pools.add(poolWith4Idle2Block);
+		
+	}
+	
+	@Test
+	public void getPoolTest(){
+		HClientPool tempHClientPool = blockedHealthBalncingPolicy.getPool(pools, null);
+		assertEquals(new CassandraHost("127.0.0.4:19164").getHost(), tempHClientPool.getCassandraHost().getHost());
+	}
+	
+	  
+}
